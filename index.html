@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تصوير من الكاميرا</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            padding-top: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        video {
+            width: 80%;
+            max-width: 600px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        canvas {
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>التقاط صورة من الكاميرا</h1>
+    <video id="video" autoplay></video>
+    <br>
+    <button id="captureButton">التقاط الصورة</button>
+    <p class="message" id="message"></p>
+
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('captureButton');
+        const message = document.getElementById('message');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let stream;
+
+        // بدء تشغيل الفيديو من كاميرا الويب
+        async function startVideo() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                message.textContent = "لم يتمكن المتصفح من الوصول إلى الكاميرا.";
+                console.error("خطأ في الوصول إلى الكاميرا: ", err);
+            }
+        }
+
+        // التقاط صورة عند الضغط على الزر
+        captureButton.addEventListener('click', () => {
+            // رسم الصورة على الـ canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/png');
+
+            // إرسال الصورة إلى الـ Webhook
+            sendImageToWebhook(imageData);
+        });
+
+        // إرسال الصورة إلى الـ Webhook
+        async function sendImageToWebhook(imageData) {
+            try {
+                const response = await fetch('', { // استبدل هذا بـ Webhook الخاص بك
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ image: imageData }) // إرسال الصورة بتنسيق JSON
+                });
+
+                if (response.ok) {
+                    message.textContent = "تم إرسال الصورة بنجاح!";
+                } else {
+                    message.textContent = "حدث خطأ أثناء إرسال الصورة.";
+                }
+            } catch (err) {
+                message.textContent = "حدث خطأ أثناء الاتصال بالـ Webhook.";
+                console.error("Error sending image:", err);
+            }
+        }
+
+        // بدء تشغيل الفيديو عند تحميل الصفحة
+        window.onload = startVideo;
+    </script>
+
+</body>
+</html>
