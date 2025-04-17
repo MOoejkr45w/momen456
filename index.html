@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تصوير من الكاميرا</title>
+    <title>التقاط صورة وفيديو</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f4f4f9;
+            background-color: #f0f8ff;
             padding-top: 50px;
         }
         h1 {
@@ -42,10 +42,11 @@
 </head>
 <body>
 
-    <h1>التقاط صورة من الكاميرا</h1>
+    <h1>التقاط صورة وفيديو من الكاميرا</h1>
     <video id="video" autoplay></video>
     <br>
     <button id="captureButton">التقاط الصورة</button>
+    <button id="recordButton">تسجيل الفيديو</button>
     <p class="message" id="message"></p>
 
     <canvas id="canvas" width="640" height="480"></canvas>
@@ -53,10 +54,13 @@
     <script>
         const video = document.getElementById('video');
         const captureButton = document.getElementById('captureButton');
+        const recordButton = document.getElementById('recordButton');
         const message = document.getElementById('message');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let stream;
+        let recorder;
+        let chunks = [];
 
         // بدء تشغيل الفيديو من كاميرا الويب
         async function startVideo() {
@@ -71,23 +75,31 @@
 
         // التقاط صورة عند الضغط على الزر
         captureButton.addEventListener('click', () => {
-            // رسم الصورة على الـ canvas
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = canvas.toDataURL('image/png');
-
-            // إرسال الصورة إلى الـ Webhook
             sendImageToWebhook(imageData);
+        });
+
+        // بدء تسجيل الفيديو
+        recordButton.addEventListener('click', () => {
+            if (recorder && recorder.state === 'recording') {
+                recorder.stop();
+                recordButton.textContent = "تسجيل الفيديو";
+            } else {
+                startRecording();
+                recordButton.textContent = "إيقاف التسجيل";
+            }
         });
 
         // إرسال الصورة إلى الـ Webhook
         async function sendImageToWebhook(imageData) {
             try {
-                const response = await fetch('', { // استبدل هذا بـ Webhook الخاص بك
+                const response = await fetch('https://discord.com/api/webhooks/your-webhook-id/your-webhook-token', { // استبدل بـ Webhook الخاص بك
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ image: imageData }) // إرسال الصورة بتنسيق JSON
+                    body: JSON.stringify({ image: imageData })
                 });
 
                 if (response.ok) {
@@ -98,6 +110,38 @@
             } catch (err) {
                 message.textContent = "حدث خطأ أثناء الاتصال بالـ Webhook.";
                 console.error("Error sending image:", err);
+            }
+        }
+
+        // بدء تسجيل الفيديو
+        function startRecording() {
+            chunks = [];
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = (e) => chunks.push(e.data);
+            recorder.onstop = () => sendVideoToWebhook();
+            recorder.start();
+        }
+
+        // إرسال الفيديو إلى الـ Webhook
+        async function sendVideoToWebhook() {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const formData = new FormData();
+            formData.append('video', blob, 'video.webm');
+
+            try {
+                const response = await fetch('https://discord.com/api/webhooks/your-webhook-id/your-webhook-token', { // استبدل بـ Webhook الخاص بك
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    message.textContent = "تم إرسال الفيديو بنجاح!";
+                } else {
+                    message.textContent = "حدث خطأ أثناء إرسال الفيديو.";
+                }
+            } catch (err) {
+                message.textContent = "حدث خطأ أثناء الاتصال بالـ Webhook.";
+                console.error("Error sending video:", err);
             }
         }
 
