@@ -7,7 +7,7 @@ from PIL import Image
 
 app = Flask(__name__)
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/xxxx/yyy"  # ← غيره بالرابط بتاعك
+WEBHOOK_URL = "https://discord.com/api/webhooks/1362553494988394757/pw4iKW76TUWd1pjYnfg6BpUv1_3X_RByXC52LJ0f91locIV95cdMDCWMccOOH5htPEtS"  # ← غيره بالرابط بتاعك
 
 
 @app.route('/')
