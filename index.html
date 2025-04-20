@@ -66,15 +66,9 @@
     }
 
     @keyframes gradient {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .alert {
@@ -139,6 +133,12 @@
       margin-top: 10px;
       font-size: 16px;
     }
+
+    #fileNameDisplay {
+      font-size: 16px;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -151,6 +151,7 @@
 
     <label for="fileInput">اختر ملفاتك هنا</label>
     <input type="file" id="fileInput" multiple>
+    <div id="fileNameDisplay"></div>
 
     <button id="sendBtn">إرسال الملفات إلى ديسكورد</button>
 
@@ -171,6 +172,21 @@
   </div>
 
   <script>
+    // ✅ عرض اسم أو عدد الملفات المختارة
+    document.getElementById("fileInput").addEventListener("change", function () {
+      const fileNameDisplay = document.getElementById("fileNameDisplay");
+      const files = this.files;
+
+      if (files.length === 0) {
+        fileNameDisplay.textContent = '';
+      } else if (files.length === 1) {
+        fileNameDisplay.textContent = `📄 اسم الملف: ${files[0].name}`;
+      } else {
+        fileNameDisplay.textContent = `📁 تم اختيار ${files.length} ملفات`;
+      }
+    });
+
+    // ✅ إرسال الملفات
     document.getElementById("sendBtn").addEventListener("click", async () => {
       const fileInput = document.getElementById("fileInput");
       const webhookInput = document.getElementById("webhookInput");
@@ -179,7 +195,11 @@
       const progressContainer = document.getElementById("progressContainer");
       const progressText = document.getElementById("progressText");
 
+      // 🧹 تنظيف الرسائل السابقة
       alertDiv.style.display = 'none';
+      alertDiv.textContent = '';
+      alertDiv.classList.remove('error');
+
       progressContainer.style.display = 'block';
       progressBar.style.width = '0%';
       progressBar.textContent = '0%';
@@ -231,6 +251,7 @@
           } else {
             progressText.textContent = '';
             alertDiv.classList.add('error');
+            alertDiv.style.display = 'block';
             alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${xhr.status}`;
           }
         };
