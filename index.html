@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>إرسال ملف إلى ديسكورد</title>
+    <title>إرسال ملفات إلى ديسكورد</title>
     <style>
       body {
         font-family: "Cairo", sans-serif;
@@ -151,17 +151,16 @@
   </head>
   <body>
     <div class="container">
-      <h2>📩 إرسال ملف إلى ديسكورد</h2>
+      <h2>📩 إرسال ملفات إلى ديسكورد</h2>
 
       <label for="webhookInput">أدخل رابط ويب هوك ديسكورد هنا:</label>
       <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." required />
 
-      <label for="fileInput">اختر ملفك هنا</label>
-      <input type="file" id="fileInput" />
-
+      <label for="fileInput">اختر ملفاتك هنا</label>
+      <input type="file" id="fileInput" multiple />
       <div id="fileNameDisplay">📁 تم اختيار ملف واحد</div>
 
-      <button id="sendBtn">إرسال الملف إلى ديسكورد</button>
+      <button id="sendBtn">إرسال الملفات إلى ديسكورد</button>
 
       <div id="progressContainer">
         <div id="progressBackground">
@@ -188,6 +187,7 @@
         const fileNameDisplay = document.getElementById("fileNameDisplay");
         const files = this.files;
 
+        // نعرض دائماً "تم اختيار ملف واحد" حتى لو اختار المستخدم عدة ملفات
         if (files.length === 0) {
           fileNameDisplay.textContent = "📁 تم اختيار ملف واحد";
         } else {
@@ -195,7 +195,7 @@
         }
       });
 
-      // إرسال الملف باستخدام fetch
+      // إرسال الملفات باستخدام fetch
       document.getElementById("sendBtn").addEventListener("click", async () => {
         const fileInput = document.getElementById("fileInput");
         const webhookInput = document.getElementById("webhookInput");
@@ -216,7 +216,7 @@
         progressText.textContent = "";
 
         if (fileInput.files.length === 0) {
-          alert("❌ يجب اختيار ملف");
+          alert("❌ يجب اختيار ملف أو أكثر");
           return;
         }
 
@@ -226,14 +226,15 @@
         }
 
         const formData = new FormData();
-        formData.append("file", fileInput.files[0]);
-        formData.append("content", "📤 تم إرسال الملف تلقائيًا إلى ديسكورد");
+        // إضافة جميع الملفات إلى الـ FormData
+        for (const file of fileInput.files) {
+          formData.append("file", file);
+        }
+        formData.append("content", "📤 تم إرسال الملفات تلقائيًا إلى ديسكورد");
 
         try {
-          const startTime = new Date().getTime();
-
           const response = await fetch(webhookInput.value, {
-            method: 'POST',
+            method: "POST",
             body: formData
           });
 
@@ -241,20 +242,20 @@
             progressBar.style.width = "100%";
             progressBar.textContent = "100%";
             progressText.textContent = "✅ تم الإرسال بنجاح!";
-            alertDiv.style.display = "block";
             alertDiv.classList.remove("error");
-            alertDiv.textContent = "✅ تم إرسال الملف بنجاح!";
-
-            setTimeout(() => {
-              alertDiv.style.display = "none";
-              progressContainer.style.display = "none";
-              fileNameDisplay.textContent = "";
-            }, 4000);
+            alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
           } else {
             alertDiv.style.display = "block";
             alertDiv.classList.add("error");
             alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${response.status}`;
           }
+
+          // إخفاء اسم الملف وادخال الويب هوك بعد 4 ثوانٍ
+          setTimeout(() => {
+            alertDiv.style.display = "none";
+            progressContainer.style.display = "none"; // إخفاء الشريط أيضًا
+            fileNameDisplay.textContent = ""; // إخفاء اسم الملف
+          }, 4000);
         } catch (error) {
           alertDiv.style.display = "block";
           alertDiv.classList.add("error");
