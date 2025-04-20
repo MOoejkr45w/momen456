@@ -112,6 +112,33 @@
       height: 80px;
       margin-top: 10px;
     }
+
+    #progressContainer {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #progressBar {
+      height: 25px;
+      width: 0%;
+      background: linear-gradient(to right, #6dd5ed, #2193b0);
+      color: white;
+      text-align: center;
+      line-height: 25px;
+      font-weight: bold;
+      border-radius: 20px;
+    }
+
+    #progressBackground {
+      background-color: #ddd;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    #progressText {
+      margin-top: 10px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -119,7 +146,6 @@
   <div class="container">
     <h2>📩 إرسال ملفات إلى ديسكورد</h2>
 
-    <!-- رابط ويب هوك -->
     <label for="webhookInput">أدخل رابط ويب هوك ديسكورد هنا:</label>
     <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." required>
 
@@ -128,9 +154,15 @@
 
     <button id="sendBtn">إرسال الملفات إلى ديسكورد</button>
 
+    <div id="progressContainer">
+      <div id="progressBackground">
+        <div id="progressBar">0%</div>
+      </div>
+      <div id="progressText"></div>
+    </div>
+
     <div id="alert" class="alert"></div>
 
-    <!-- معلومات ديسكورد -->
     <div class="discord-info">
       <span>للتواصل مع المبرمج:</span>
       <a href="https://discord.com/users/725885877770911754" target="_blank">momen.evil</a>
@@ -143,6 +175,15 @@
       const fileInput = document.getElementById("fileInput");
       const webhookInput = document.getElementById("webhookInput");
       const alertDiv = document.getElementById("alert");
+      const progressBar = document.getElementById("progressBar");
+      const progressContainer = document.getElementById("progressContainer");
+      const progressText = document.getElementById("progressText");
+
+      alertDiv.style.display = 'none';
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      progressBar.textContent = '0%';
+      progressText.textContent = '';
 
       if (fileInput.files.length === 0) {
         alert("❌ يجب اختيار ملف أو أكثر");
@@ -158,32 +199,53 @@
       for (const file of fileInput.files) {
         formData.append("file", file);
       }
-
       formData.append("content", "📤 تم إرسال الملفات تلقائيًا إلى ديسكورد");
 
       try {
-        const res = await fetch(webhookInput.value, {
-          method: "POST",
-          body: formData,
-        });
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", webhookInput.value, true);
 
-        const data = await res.json();
+        let startTime = new Date().getTime();
 
-        alertDiv.style.display = 'block';
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            let percentComplete = Math.round((event.loaded / event.total) * 100);
+            let elapsed = (new Date().getTime() - startTime) / 1000;
+            let speed = event.loaded / elapsed;
+            let remainingTime = ((event.total - event.loaded) / speed).toFixed(1);
 
-        if (res.ok) {
-          alertDiv.classList.remove('error');
-          alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
-          // إذا تم إرسال الملفات بنجاح، عرض روابط الملفات المرفقة
-          if (data.attachments && data.attachments.length > 0) {
-            const fileLinks = data.attachments.map(file => file.url);
-            alertDiv.textContent += ` الروابط: ${fileLinks.join(', ')}`;
+            progressBar.style.width = percentComplete + "%";
+            progressBar.textContent = percentComplete + "%";
+            progressText.textContent = `📦 جاري الرفع... فاضل تقريبًا ${remainingTime} ثانية`;
           }
-        } else {
+        };
+
+        xhr.onload = function () {
+          alertDiv.style.display = 'block';
+          if (xhr.status >= 200 && xhr.status < 300) {
+            progressBar.style.width = '100%';
+            progressBar.textContent = '100%';
+            progressText.textContent = '✅ تم الإرسال بنجاح!';
+            alertDiv.classList.remove('error');
+            alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
+          } else {
+            progressText.textContent = '';
+            alertDiv.classList.add('error');
+            alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${xhr.status}`;
+          }
+        };
+
+        xhr.onerror = function () {
+          progressText.textContent = '';
+          alertDiv.style.display = 'block';
           alertDiv.classList.add('error');
-          alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${res.status} - ${data.message || ''}`;
-        }
+          alertDiv.textContent = "❌ حدث خطأ أثناء الإرسال.";
+        };
+
+        xhr.send(formData);
+
       } catch (error) {
+        alertDiv.style.display = 'block';
         alertDiv.classList.add('error');
         alertDiv.textContent = `❌ حدث خطأ أثناء الإرسال: ${error.message}`;
       }
