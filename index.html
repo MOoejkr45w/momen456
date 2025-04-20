@@ -195,7 +195,7 @@
         }
       });
 
-      // إرسال الملفات باستخدام fetch
+      // إرسال الملفات
       document.getElementById("sendBtn").addEventListener("click", async () => {
         const fileInput = document.getElementById("fileInput");
         const webhookInput = document.getElementById("webhookInput");
@@ -233,29 +233,54 @@
         formData.append("content", "📤 تم إرسال الملفات تلقائيًا إلى ديسكورد");
 
         try {
-          const response = await fetch(webhookInput.value, {
-            method: "POST",
-            body: formData
-          });
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", webhookInput.value, true);
 
-          if (response.ok) {
-            progressBar.style.width = "100%";
-            progressBar.textContent = "100%";
-            progressText.textContent = "✅ تم الإرسال بنجاح!";
-            alertDiv.classList.remove("error");
-            alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
-          } else {
+          let startTime = new Date().getTime();
+
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              let percentComplete = Math.round((event.loaded / event.total) * 100);
+              let elapsed = (new Date().getTime() - startTime) / 1000;
+              let speed = event.loaded / elapsed;
+              let remainingTime = ((event.total - event.loaded) / speed).toFixed(1);
+
+              progressBar.style.width = percentComplete + "%";
+              progressBar.textContent = percentComplete + "%";
+              progressText.textContent = `📦 جاري الرفع... فاضل تقريبًا ${remainingTime} ثانية`;
+            }
+          };
+
+          xhr.onload = function () {
+            alertDiv.style.display = "block";
+            if (xhr.status >= 200 && xhr.status < 300) {
+              progressBar.style.width = "100%";
+              progressBar.textContent = "100%";
+              progressText.textContent = "✅ تم الإرسال بنجاح!";
+              alertDiv.classList.remove("error");
+              alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
+
+              // إخفاء اسم الملف وادخال الويب هوك بعد 4 ثوانٍ
+              setTimeout(() => {
+                alertDiv.style.display = "none";
+                progressContainer.style.display = "none"; // إخفاء الشريط أيضًا
+                fileNameDisplay.textContent = ""; // إخفاء اسم الملف
+              }, 4000);
+            } else {
+              alertDiv.style.display = "block";
+              alertDiv.classList.add("error");
+              alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${xhr.status}`;
+            }
+          };
+
+          xhr.onerror = function () {
+            progressText.textContent = "";
             alertDiv.style.display = "block";
             alertDiv.classList.add("error");
-            alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${response.status}`;
-          }
+            alertDiv.textContent = "❌ حدث خطأ أثناء الإرسال.";
+          };
 
-          // إخفاء اسم الملف وادخال الويب هوك بعد 4 ثوانٍ
-          setTimeout(() => {
-            alertDiv.style.display = "none";
-            progressContainer.style.display = "none"; // إخفاء الشريط أيضًا
-            fileNameDisplay.textContent = ""; // إخفاء اسم الملف
-          }, 4000);
+          xhr.send(formData);
         } catch (error) {
           alertDiv.style.display = "block";
           alertDiv.classList.add("error");
