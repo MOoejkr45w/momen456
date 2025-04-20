@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>اختبار سرعة الإنترنت</title>
+    <title>إرسال ملفات إلى ديسكورد واختبار سرعة الإنترنت</title>
     <style>
       body {
         font-family: "Cairo", sans-serif;
@@ -92,8 +92,18 @@
   </head>
   <body>
     <div class="container">
-      <h2>اختبار سرعة الإنترنت</h2>
+      <h2>📩 إرسال ملفات إلى ديسكورد</h2>
 
+      <label for="webhookInput">أدخل رابط ويب هوك ديسكورد هنا:</label>
+      <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." required />
+
+      <label for="fileInput">اختر ملفاتك هنا</label>
+      <input type="file" id="fileInput" multiple />
+      <div id="fileNameDisplay">📁 تم اختيار ملف واحد</div>
+
+      <button id="sendBtn">إرسال الملفات إلى ديسكورد</button>
+
+      <!-- اختبارات سرعة الإنترنت -->
       <button id="internetSpeedBtn" onclick="checkInternetSpeed()">حساب سرعة الإنترنت</button>
 
       <!-- Circular Loading Spinner -->
@@ -103,6 +113,17 @@
 
       <div id="downloadSpeed" class="speedResult"></div>
       <div id="uploadSpeed" class="speedResult"></div>
+
+      <div id="alert" class="alert"></div>
+
+      <div class="discord-info">
+        <span>للتواصل مع المبرمج:</span>
+        <a href="https://discord.com/users/725885877770911754" target="_blank">momen.evil</a>
+        <img
+          src="https://media.discordapp.net/attachments/1031970632658858015/1363331289276485672/images.jpeg?ex=6805a4b4&is=68045334&hm=89ce65adb92482cd56dfbbda97ca91afe216c199b9138ee049c31f0b5ddcf535&=&format=webp"
+          alt="Discord Profile Picture"
+        />
+      </div>
     </div>
 
     <script>
@@ -113,7 +134,9 @@
         const downloadSpeedDiv = document.getElementById("downloadSpeed");
         const uploadSpeedDiv = document.getElementById("uploadSpeed");
 
-        // عرض الشريط المتحرك و"جاري الحساب"
+        // إخفاء الرسائل السابقة و عرض الساعة الدائرية و "جاري الحساب"
+        downloadSpeedDiv.textContent = "";
+        uploadSpeedDiv.textContent = "";
         speedInfoDiv.textContent = "جاري حساب سرعة الإنترنت...";
         loadingIndicator.style.display = "block"; // عرض الساعة الدائرية
 
@@ -130,7 +153,7 @@
           // إخفاء الساعة المتحركة
           loadingIndicator.style.display = "none";
 
-          // عرض السرعة بعد حسابها
+          // عرض سرعة التحميل
           downloadSpeedDiv.textContent = `سرعة التحميل: ${speed} ميغابت/ثانية`;
 
           // بدء حساب سرعة الرفع بعد حساب التحميل
@@ -153,8 +176,120 @@
 
           // عرض سرعة الرفع
           uploadSpeedDiv.textContent = `سرعة الرفع: ${uploadSpeed} ميغابت/ثانية`;
+
+          // بعد 4 ثواني، إخفاء السرعات
+          setTimeout(function () {
+            downloadSpeedDiv.textContent = "";
+            uploadSpeedDiv.textContent = "";
+            speedInfoDiv.textContent = "";
+          }, 4000);
         };
       }
+
+      // عرض اسم أو عدد الملفات المختارة
+      document.getElementById("fileInput").addEventListener("change", function () {
+        const fileNameDisplay = document.getElementById("fileNameDisplay");
+        const files = this.files;
+
+        if (files.length === 0) {
+          fileNameDisplay.textContent = "📁 تم اختيار ملف واحد";
+        } else {
+          fileNameDisplay.textContent = `📁 تم اختيار ${files.length} ملفات`;
+        }
+      });
+
+      // إرسال الملفات
+      document.getElementById("sendBtn").addEventListener("click", async () => {
+        const fileInput = document.getElementById("fileInput");
+        const webhookInput = document.getElementById("webhookInput");
+        const alertDiv = document.getElementById("alert");
+        const progressBar = document.getElementById("progressBar");
+        const progressContainer = document.getElementById("progressContainer");
+        const progressText = document.getElementById("progressText");
+        const fileNameDisplay = document.getElementById("fileNameDisplay");
+
+        // تنظيف الرسائل السابقة
+        alertDiv.style.display = "none";
+        alertDiv.textContent = "";
+        alertDiv.classList.remove("error");
+
+        progressContainer.style.display = "block";
+        progressBar.style.width = "0%";
+        progressBar.textContent = "0%";
+        progressText.textContent = "";
+
+        if (fileInput.files.length === 0) {
+          alert("❌ يجب اختيار ملف أو أكثر");
+          return;
+        }
+
+        if (!webhookInput.value) {
+          alert("❌ يجب إدخال رابط الويب هوك");
+          return;
+        }
+
+        const formData = new FormData();
+        // إضافة جميع الملفات إلى الـ FormData
+        for (const file of fileInput.files) {
+          formData.append("file", file);
+        }
+        formData.append("content", "📤 تم إرسال الملفات تلقائيًا إلى ديسكورد");
+
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", webhookInput.value, true);
+
+          let startTime = new Date().getTime();
+
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              let percentComplete = Math.round((event.loaded / event.total) * 100);
+              let elapsed = (new Date().getTime() - startTime) / 1000;
+              let speed = event.loaded / elapsed;
+              let remainingTime = ((event.total - event.loaded) / speed).toFixed(1);
+
+              progressBar.style.width = percentComplete + "%";
+              progressBar.textContent = percentComplete + "%";
+              progressText.textContent = `📦 جاري الرفع... فاضل تقريبًا ${remainingTime} ثانية`;
+            }
+          };
+
+          xhr.onload = function () {
+            alertDiv.style.display = "block";
+            if (xhr.status >= 200 && xhr.status < 300) {
+              progressBar.style.width = "100%";
+              progressBar.textContent = "100%";
+              progressText.textContent = "✅ تم الإرسال بنجاح!";
+              alertDiv.classList.remove("error");
+              alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
+
+              // إخفاء اسم الملف وادخال الويب هوك بعد 4 ثوانٍ
+              setTimeout(() => {
+                alertDiv.style.display = "none";
+                progressContainer.style.display = "none"; // إخفاء الشريط أيضًا
+                fileNameDisplay.textContent = ""; // إخفاء اسم الملف
+              }, 4000);
+            } else {
+              alertDiv.style.display = "block";
+              alertDiv.classList.add("error");
+              alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${xhr.status}`;
+            }
+          };
+
+          xhr.onerror = function () {
+            progressText.textContent = "";
+            alertDiv.style.display = "block";
+            alertDiv.classList.add("error");
+            alertDiv.textContent = "❌ حدث خطأ أثناء الإرسال.";
+          };
+
+          xhr.send(formData);
+        } catch (error) {
+          alertDiv.style.display = "block";
+          alertDiv.classList.add("error");
+          alertDiv.textContent = `❌ حدث خطأ أثناء الإرسال: ${error.message}`;
+        }
+      });
     </script>
   </body>
 </html>
