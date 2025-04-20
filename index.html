@@ -88,55 +88,55 @@
         document.getElementById("loadingIndicator").style.display = "block";
 
         // حساب سرعة التحميل
-        const image = new Image();
-        const startTime = new Date().getTime();
-        image.src = "https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_light_color_92x30dp.png?" + Math.random();
-
-        image.onload = function () {
-          const endTime = new Date().getTime();
-          const duration = (endTime - startTime) / 1000; // الوقت بالثواني
-          const speed = (image.src.length / duration / 1024).toFixed(2); // السرعة بالميغابايت/ثانية
-
-          // تحويل السرعة من ميغابايت إلى ميغابت
-          const downloadSpeedMbps = (speed * 8).toFixed(2); // التحويل من MB إلى Mbps
-
-          // إخفاء الساعة المتحركة
-          document.getElementById("loadingIndicator").style.display = "none";
-
-          // عرض سرعة التحميل بالميغابت
-          document.getElementById("downloadSpeed").textContent = `سرعة التحميل: ${downloadSpeedMbps} ميغابت/ثانية`;
-
-          // بدء حساب سرعة الرفع بعد حساب التحميل
-          checkUploadSpeed();
-        };
+        testDownloadSpeed();
       });
 
-      function checkUploadSpeed() {
-        // حساب سرعة الرفع
-        const uploadSpeedDiv = document.getElementById("uploadSpeed");
+      function testDownloadSpeed() {
+        const startTime = new Date().getTime();
+        const testFile = new Image();
+        testFile.src = "https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_light_color_92x30dp.png?" + Math.random();
 
-        const uploadStartTime = new Date().getTime();
-        const uploadImage = new Image();
-        uploadImage.src = "https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_light_color_92x30dp.png?" + Math.random();
+        testFile.onload = function () {
+          const endTime = new Date().getTime();
+          const duration = (endTime - startTime) / 1000; // الوقت بالثواني
+          const fileSize = testFile.src.length / 8; // قياس حجم الصورة بالميغابايت
+          const speedMbps = ((fileSize / duration) * 8).toFixed(2); // السرعة بالميغابت في الثانية
 
-        uploadImage.onload = function () {
-          const uploadEndTime = new Date().getTime();
-          const uploadDuration = (uploadEndTime - uploadStartTime) / 1000; // الوقت بالثواني
-          const uploadSpeed = (uploadImage.src.length / uploadDuration / 1024).toFixed(2); // السرعة بالميغابايت/ثانية
+          // عرض سرعة التحميل بالميغابت
+          document.getElementById("downloadSpeed").textContent = `سرعة التحميل: ${speedMbps} ميغابت/ثانية`;
 
-          // تحويل السرعة من ميغابايت إلى ميغابت
-          const uploadSpeedMbps = (uploadSpeed * 8).toFixed(2); // التحويل من MB إلى Mbps
+          // حساب سرعة الرفع بعد حساب التحميل
+          testUploadSpeed();
+        };
+      }
 
-          // عرض سرعة الرفع بالميغابت
-          uploadSpeedDiv.textContent = `سرعة الرفع: ${uploadSpeedMbps} ميغابت/ثانية`;
+      function testUploadSpeed() {
+        const uploadFile = new Blob([new ArrayBuffer(1024 * 1024)]); // ملف بحجم 1 ميجابايت
+        const startTime = new Date().getTime();
 
-          // بعد 4 ثواني، إخفاء السرعات
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://your-upload-endpoint-here.com", true);
+        xhr.setRequestHeader("Content-Type", "application/octet-stream");
+        
+        xhr.onload = function () {
+          const endTime = new Date().getTime();
+          const duration = (endTime - startTime) / 1000; // الوقت بالثواني
+          const fileSize = uploadFile.size / 1024 / 1024; // الحجم بالميغابايت
+          const speedMbps = ((fileSize / duration) * 8).toFixed(2); // السرعة بالميغابت في الثانية
+
+          // عرض سرعة الرفع
+          document.getElementById("uploadSpeed").textContent = `سرعة الرفع: ${speedMbps} ميغابت/ثانية`;
+
+          // إخفاء الرسالة بعد 4 ثوانٍ
           setTimeout(function () {
             document.getElementById("downloadSpeed").textContent = "";
             document.getElementById("uploadSpeed").textContent = "";
-            document.getElementById("speedInfo").style.display = "none"; // إخفاء كافة النصوص
+            document.getElementById("speedInfo").style.display = "none";
           }, 4000);
         };
+
+        // إرسال البيانات
+        xhr.send(uploadFile);
       }
     </script>
   </body>
