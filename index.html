@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>إرسال ملفات إلى ديسكورد</title>
-    <style>
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ar&quot; dir=&quot;rtl&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;إرسال ملفات إلى ديسكورد&lt;/title&gt;
+    &lt;style&gt;
       body {
-        font-family: "Cairo", sans-serif;
+        font-family: &quot;Cairo&quot;, sans-serif;
         background: linear-gradient(135deg, #6e7fdb, #4158d0, #c850c0, #ffcc70);
         background-size: 400% 400%;
         animation: gradient 15s ease infinite;
@@ -35,8 +35,8 @@
         display: block;
       }
 
-      input[type="text"],
-      input[type="file"] {
+      input[type=&quot;text&quot;],
+      input[type=&quot;file&quot;] {
         width: 100%;
         padding: 12px;
         margin: 10px 0;
@@ -61,8 +61,8 @@
         background-color: #2980b9;
       }
 
-      input[type="file"]:focus,
-      input[type="text"]:focus {
+      input[type=&quot;file&quot;]:focus,
+      input[type=&quot;text&quot;]:focus {
         outline: none;
         box-shadow: 0 0 10px rgba(52, 152, 219, 0.8);
       }
@@ -147,146 +147,146 @@
         color: black;
         margin-bottom: 10px;
       }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h2>📩 إرسال ملفات إلى ديسكورد</h2>
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div class=&quot;container&quot;&gt;
+      &lt;h2&gt;📩 إرسال ملفات إلى ديسكورد&lt;/h2&gt;
 
-      <label for="webhookInput">أدخل رابط ويب هوك ديسكورد هنا:</label>
-      <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." required />
+      &lt;label for=&quot;webhookInput&quot;&gt;أدخل رابط ويب هوك ديسكورد هنا:&lt;/label&gt;
+      &lt;input type=&quot;text&quot; id=&quot;webhookInput&quot; placeholder=&quot;https://discord.com/api/webhooks/...&quot; required /&gt;
 
-      <label for="fileInput">اختر ملفاتك هنا</label>
-      <input type="file" id="fileInput" multiple />
-      <div id="fileNameDisplay">📁 تم اختيار ملف واحد</div>
+      &lt;label for=&quot;fileInput&quot;&gt;اختر ملفاتك هنا&lt;/label&gt;
+      &lt;input type=&quot;file&quot; id=&quot;fileInput&quot; multiple /&gt;
+      &lt;div id=&quot;fileNameDisplay&quot;&gt;📁 تم اختيار ملف واحد&lt;/div&gt;
 
-      <button id="sendBtn">إرسال الملفات إلى ديسكورد</button>
+      &lt;button id=&quot;sendBtn&quot;&gt;إرسال الملفات إلى ديسكورد&lt;/button&gt;
 
-      <div id="progressContainer">
-        <div id="progressBackground">
-          <div id="progressBar">0%</div>
-        </div>
-        <div id="progressText"></div>
-      </div>
+      &lt;div id=&quot;progressContainer&quot;&gt;
+        &lt;div id=&quot;progressBackground&quot;&gt;
+          &lt;div id=&quot;progressBar&quot;&gt;0%&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div id=&quot;progressText&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
 
-      <div id="alert" class="alert"></div>
+      &lt;div id=&quot;alert&quot; class=&quot;alert&quot;&gt;&lt;/div&gt;
 
-      <div class="discord-info">
-        <span>للتواصل مع المبرمج:</span>
-        <a href="https://discord.com/users/725885877770911754" target="_blank">momen.evil</a>
-        <img
-          src="https://media.discordapp.net/attachments/1031970632658858015/1363331289276485672/images.jpeg?ex=6805a4b4&is=68045334&hm=89ce65adb92482cd56dfbbda97ca91afe216c199b9138ee049c31f0b5ddcf535&=&format=webp"
-          alt="Discord Profile Picture"
-        />
-      </div>
-    </div>
+      &lt;div class=&quot;discord-info&quot;&gt;
+        &lt;span&gt;للتواصل مع المبرمج:&lt;/span&gt;
+        &lt;a href=&quot;https://discord.com/users/725885877770911754&quot; target=&quot;_blank&quot;&gt;momen.evil&lt;/a&gt;
+        &lt;img
+          src=&quot;https://media.discordapp.net/attachments/1031970632658858015/1363331289276485672/images.jpeg?ex=6805a4b4&amp;is=68045334&amp;hm=89ce65adb92482cd56dfbbda97ca91afe216c199b9138ee049c31f0b5ddcf535&amp;=&amp;format=webp&quot;
+          alt=&quot;Discord Profile Picture&quot;
+        /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
 
-    <script>
+    &lt;script&gt;
       // عرض اسم أو عدد الملفات المختارة
-      document.getElementById("fileInput").addEventListener("change", function () {
-        const fileNameDisplay = document.getElementById("fileNameDisplay");
+      document.getElementById(&quot;fileInput&quot;).addEventListener(&quot;change&quot;, function () {
+        const fileNameDisplay = document.getElementById(&quot;fileNameDisplay&quot;);
         const files = this.files;
 
-        // نعرض دائماً "تم اختيار ملف واحد" حتى لو اختار المستخدم عدة ملفات
+        // نعرض دائماً &quot;تم اختيار ملف واحد&quot; حتى لو اختار المستخدم عدة ملفات
         if (files.length === 0) {
-          fileNameDisplay.textContent = "📁 تم اختيار ملف واحد";
+          fileNameDisplay.textContent = &quot;📁 تم اختيار ملف واحد&quot;;
         } else {
           fileNameDisplay.textContent = `📁 تم اختيار ${files.length} ملفات`;
         }
       });
 
       // إرسال الملفات
-      document.getElementById("sendBtn").addEventListener("click", async () => {
-        const fileInput = document.getElementById("fileInput");
-        const webhookInput = document.getElementById("webhookInput");
-        const alertDiv = document.getElementById("alert");
-        const progressBar = document.getElementById("progressBar");
-        const progressContainer = document.getElementById("progressContainer");
-        const progressText = document.getElementById("progressText");
-        const fileNameDisplay = document.getElementById("fileNameDisplay");
+      document.getElementById(&quot;sendBtn&quot;).addEventListener(&quot;click&quot;, async () =&gt; {
+        const fileInput = document.getElementById(&quot;fileInput&quot;);
+        const webhookInput = document.getElementById(&quot;webhookInput&quot;);
+        const alertDiv = document.getElementById(&quot;alert&quot;);
+        const progressBar = document.getElementById(&quot;progressBar&quot;);
+        const progressContainer = document.getElementById(&quot;progressContainer&quot;);
+        const progressText = document.getElementById(&quot;progressText&quot;);
+        const fileNameDisplay = document.getElementById(&quot;fileNameDisplay&quot;);
 
         // تنظيف الرسائل السابقة
-        alertDiv.style.display = "none";
-        alertDiv.textContent = "";
-        alertDiv.classList.remove("error");
+        alertDiv.style.display = &quot;none&quot;;
+        alertDiv.textContent = &quot;&quot;;
+        alertDiv.classList.remove(&quot;error&quot;);
 
-        progressContainer.style.display = "block";
-        progressBar.style.width = "0%";
-        progressBar.textContent = "0%";
-        progressText.textContent = "";
+        progressContainer.style.display = &quot;block&quot;;
+        progressBar.style.width = &quot;0%&quot;;
+        progressBar.textContent = &quot;0%&quot;;
+        progressText.textContent = &quot;&quot;;
 
         if (fileInput.files.length === 0) {
-          alert("❌ يجب اختيار ملف أو أكثر");
+          alert(&quot;❌ يجب اختيار ملف أو أكثر&quot;);
           return;
         }
 
         if (!webhookInput.value) {
-          alert("❌ يجب إدخال رابط الويب هوك");
+          alert(&quot;❌ يجب إدخال رابط الويب هوك&quot;);
           return;
         }
 
         const formData = new FormData();
         // إضافة جميع الملفات إلى الـ FormData
         for (const file of fileInput.files) {
-          formData.append("file", file);
+          formData.append(&quot;file&quot;, file);
         }
-        formData.append("content", "📤 تم إرسال الملفات تلقائيًا إلى ديسكورد");
+        formData.append(&quot;content&quot;, &quot;📤 تم إرسال الملفات تلقائيًا إلى ديسكورد&quot;);
 
         try {
           const xhr = new XMLHttpRequest();
-          xhr.open("POST", webhookInput.value, true);
+          xhr.open(&quot;POST&quot;, webhookInput.value, true);
 
           let startTime = new Date().getTime();
 
-          xhr.upload.onprogress = (event) => {
+          xhr.upload.onprogress = (event) =&gt; {
             if (event.lengthComputable) {
               let percentComplete = Math.round((event.loaded / event.total) * 100);
               let elapsed = (new Date().getTime() - startTime) / 1000;
               let speed = event.loaded / elapsed;
               let remainingTime = ((event.total - event.loaded) / speed).toFixed(1);
 
-              progressBar.style.width = percentComplete + "%";
-              progressBar.textContent = percentComplete + "%";
+              progressBar.style.width = percentComplete + &quot;%&quot;;
+              progressBar.textContent = percentComplete + &quot;%&quot;;
               progressText.textContent = `📦 جاري الرفع... فاضل تقريبًا ${remainingTime} ثانية`;
             }
           };
 
           xhr.onload = function () {
-            alertDiv.style.display = "block";
-            if (xhr.status >= 200 && xhr.status < 300) {
-              progressBar.style.width = "100%";
-              progressBar.textContent = "100%";
-              progressText.textContent = "✅ تم الإرسال بنجاح!";
-              alertDiv.classList.remove("error");
-              alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
+            alertDiv.style.display = &quot;block&quot;;
+            if (xhr.status &gt;= 200 &amp;&amp; xhr.status &lt; 300) {
+              progressBar.style.width = &quot;100%&quot;;
+              progressBar.textContent = &quot;100%&quot;;
+              progressText.textContent = &quot;✅ تم الإرسال بنجاح!&quot;;
+              alertDiv.classList.remove(&quot;error&quot;);
+              alertDiv.textContent = &quot;✅ تم إرسال الملفات بنجاح!&quot;;
 
               // إخفاء اسم الملف وادخال الويب هوك بعد 4 ثوانٍ
-              setTimeout(() => {
-                alertDiv.style.display = "none";
-                progressContainer.style.display = "none"; // إخفاء الشريط أيضًا
-                fileNameDisplay.textContent = ""; // إخفاء اسم الملف
+              setTimeout(() =&gt; {
+                alertDiv.style.display = &quot;none&quot;;
+                progressContainer.style.display = &quot;none&quot;; // إخفاء الشريط أيضًا
+                fileNameDisplay.textContent = &quot;&quot;; // إخفاء اسم الملف
               }, 4000);
             } else {
-              alertDiv.style.display = "block";
-              alertDiv.classList.add("error");
+              alertDiv.style.display = &quot;block&quot;;
+              alertDiv.classList.add(&quot;error&quot;);
               alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${xhr.status}`;
             }
           };
 
           xhr.onerror = function () {
-            progressText.textContent = "";
-            alertDiv.style.display = "block";
-            alertDiv.classList.add("error");
-            alertDiv.textContent = "❌ حدث خطأ أثناء الإرسال.";
+            progressText.textContent = &quot;&quot;;
+            alertDiv.style.display = &quot;block&quot;;
+            alertDiv.classList.add(&quot;error&quot;);
+            alertDiv.textContent = &quot;❌ حدث خطأ أثناء الإرسال.&quot;;
           };
 
           xhr.send(formData);
         } catch (error) {
-          alertDiv.style.display = "block";
-          alertDiv.classList.add("error");
+          alertDiv.style.display = &quot;block&quot;;
+          alertDiv.classList.add(&quot;error&quot;);
           alertDiv.textContent = `❌ حدث خطأ أثناء الإرسال: ${error.message}`;
         }
       });
-    </script>
-  </body>
-</html>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
