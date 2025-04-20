@@ -89,6 +89,29 @@
     .error {
       background-color: #e74c3c;
     }
+
+    .discord-info {
+      margin-top: 30px;
+      font-size: 18px;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .discord-info a {
+      color: #3498db;
+      text-decoration: none;
+      font-size: 20px;
+    }
+
+    .discord-info img {
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -96,6 +119,7 @@
   <div class="container">
     <h2>📩 إرسال ملفات إلى ديسكورد</h2>
 
+    <!-- رابط ويب هوك -->
     <label for="webhookInput">أدخل رابط ويب هوك ديسكورد هنا:</label>
     <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." required>
 
@@ -105,6 +129,13 @@
     <button id="sendBtn">إرسال الملفات إلى ديسكورد</button>
 
     <div id="alert" class="alert"></div>
+
+    <!-- معلومات ديسكورد -->
+    <div class="discord-info">
+      <span>للتواصل مع المبرمج:</span>
+      <a href="https://discord.com/users/725885877770911754" target="_blank">momen.evil</a>
+      <img src="https://media.discordapp.net/attachments/1031970632658858015/1363331289276485672/images.jpeg?ex=6805a4b4&is=68045334&hm=89ce65adb92482cd56dfbbda97ca91afe216c199b9138ee049c31f0b5ddcf535&=&format=webp" alt="Discord Profile Picture">
+    </div>
   </div>
 
   <script>
