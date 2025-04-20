@@ -151,7 +151,7 @@
 
     <label for="fileInput">اختر ملفاتك هنا</label>
     <input type="file" id="fileInput" multiple>
-    <div id="fileNameDisplay"></div>
+    <div id="fileNameDisplay">📁 تم اختيار ملف واحد</div>
 
     <button id="sendBtn">إرسال الملفات إلى ديسكورد</button>
 
@@ -177,12 +177,11 @@
       const fileNameDisplay = document.getElementById("fileNameDisplay");
       const files = this.files;
 
+      // نعرض دائماً "تم اختيار ملف واحد" حتى لو اختار المستخدم عدة ملفات
       if (files.length === 0) {
-        fileNameDisplay.textContent = '';
-      } else if (files.length === 1) {
-        fileNameDisplay.textContent = `📄 اسم الملف: ${files[0].name}`;
+        fileNameDisplay.textContent = '📁 تم اختيار ملف واحد';
       } else {
-        fileNameDisplay.textContent = `📁 تم اختيار ${files.length} ملفات`;
+        fileNameDisplay.textContent = '📁 تم اختيار ملف واحد';
       }
     });
 
