@@ -196,6 +196,11 @@
         font-size: 20px;
         color: #fff;
       }
+
+      /* Hide speed result text initially */
+      #speedInfo, #downloadSpeed, #uploadSpeed {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -241,10 +246,12 @@
         const downloadSpeedDiv = document.getElementById("downloadSpeed");
         const uploadSpeedDiv = document.getElementById("uploadSpeed");
 
-        // إخفاء الرسائل السابقة وعرض الساعة الدائرية
+        // إخفاء نتائج السرعة السابقة
         downloadSpeedDiv.textContent = "";
         uploadSpeedDiv.textContent = "";
-        speedInfoDiv.textContent = "جاري حساب سرعة الإنترنت...";
+
+        // إظهار "جاري حساب سرعة الإنترنت..." والساعة الدائرية
+        speedInfoDiv.style.display = "block";
         loadingIndicator.style.display = "block"; // عرض الساعة الدائرية
 
         // حساب سرعة التحميل
