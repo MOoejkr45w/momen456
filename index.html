@@ -115,7 +115,7 @@
     #progressBar {
       height: 25px;
       width: 0%;
-      background: linear-gradient(to right, #6dd5ed, #2193b0);
+      background: linear-gradient(to right, #ff4d4d, #990000); /* أحمر متدرج */
       color: white;
       text-align: center;
       line-height: 25px;
@@ -124,7 +124,7 @@
     }
 
     #progressBackground {
-      background-color: #ddd;
+      background-color: #000; /* خلفية سوداء */
       border-radius: 20px;
       overflow: hidden;
     }
@@ -136,7 +136,7 @@
 
     #fileNameDisplay {
       font-size: 16px;
-      color: #ffffff;
+      color: black; /* تغيير اللون إلى الأسود */
       margin-bottom: 10px;
     }
   </style>
@@ -216,6 +216,7 @@
       }
 
       const formData = new FormData();
+      // ✅ إضافة جميع الملفات إلى الـ FormData
       for (const file of fileInput.files) {
         formData.append("file", file);
       }
@@ -249,9 +250,8 @@
             alertDiv.classList.remove('error');
             alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
           } else {
-            progressText.textContent = '';
-            alertDiv.classList.add('error');
             alertDiv.style.display = 'block';
+            alertDiv.classList.add('error');
             alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${xhr.status}`;
           }
         };
