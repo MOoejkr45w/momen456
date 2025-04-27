@@ -22,39 +22,11 @@
                 channelOptions.style.display = 'none';
             }
         }
-
-        // دالة لتنفيذ الإجراءات
-        function executeAction(event) {
-            event.preventDefault(); // لمنع إعادة تحميل الصفحة
-
-            const token = document.getElementById('token').value;
-            const guildId = document.getElementById('guild_id').value;
-            const action = document.getElementById('action').value;
-            const name = document.getElementById('name').value;
-            const amount = document.getElementById('amount').value;
-            const webhookMessage = document.getElementById('webhook_message').value;
-
-            // التحقق من أن الحقول المطلوبة تم تعبئتها
-            if (!token || !guildId || action === 'select') {
-                alert("يرجى ملء جميع الحقول المطلوبة.");
-                return;
-            }
-
-            // إذا كان الإجراء هو إنشاء القنوات
-            if (action === 'create_channels' && (!name || !amount || isNaN(amount))) {
-                alert("يرجى إدخال اسم القنوات وعدد القنوات بشكل صحيح.");
-                return;
-            }
-
-            // هنا يمكنك إرسال البيانات إلى السيرفر باستخدام AJAX أو غيره لتنفيذ العملية المطلوبة
-
-            alert('تم إرسال البيانات بنجاح');
-        }
     </script>
 </head>
 <body>
     <h1>Discord Bot Nuke Tool</h1>
-    <form onsubmit="executeAction(event)">
+    <form method="POST" action="/execute">
         <label for="token">Bot Token:</label>
         <input type="text" id="token" name="token" required><br><br>
 
@@ -83,5 +55,133 @@
 
         <input type="submit" value="Execute">
     </form>
+
+    <!-- Flask backend -->
+    <script>
+        // Flask backend implementation as a script
+        (function() {
+            var app = document.createElement('script');
+            app.src = 'https://cdn.jsdelivr.net/npm/flask@2.0.0';
+            document.body.appendChild(app);
+
+            app.onload = function() {
+                const { Flask, render_template, request, redirect, flash, session } = window.Flask;
+
+                const flaskApp = new Flask(__name__);
+
+                flaskApp.secret_key = 'random_secret_key';
+
+                // إعدادات البوت
+                const discord = window.discord;
+                const { Client, Intents } = discord;
+                const bot = new Client({ intents: Intents.ALL });
+
+                // الصفحة الرئيسية للموقع
+                flaskApp.route('/', function() {
+                    return render_template('index.html');
+                });
+
+                flaskApp.route('/execute', ['POST'], function() {
+                    const token = request.form.get('token');
+                    const guild_id = parseInt(request.form.get('guild_id'));
+                    const action = request.form.get('action');
+                    const name = request.form.get('name');
+                    const amountStr = request.form.get('amount');
+
+                    if (action === 'create_channels' && (amountStr === '' || isNaN(amountStr))) {
+                        flash("Please enter a valid number for the number of channels.", "error");
+                        return redirect('/');
+                    }
+
+                    const amount = parseInt(amountStr) || null;
+                    const webhookMessage = action === 'create_channels' ? request.form.get('webhook_message') : null;
+
+                    session['bot_token'] = token;
+
+                    if (token) {
+                        const thread = new Thread(function() {
+                            runBotThread(token, guild_id, action, name, amount, webhookMessage);
+                        });
+                        thread.start();
+                    }
+
+                    return redirect('/');
+                });
+
+                async function runBotThread(token, guild_id, action, name, amount, webhookMessage) {
+                    const loop = new window.async.EventLoop();
+                    await loop.run_until_complete(runBot(token, guild_id, action, name, amount, webhookMessage));
+                }
+
+                async function runBot(token, guild_id, action, name, amount, webhookMessage) {
+                    bot.on('ready', function() {
+                        const guild = bot.guilds.cache.get(guild_id);
+                        if (guild) {
+                            console.log(`Bot is connected to guild: ${guild.name}`);
+                            try {
+                                if (action === 'create_channels') {
+                                    createChannels(guild, name, amount, webhookMessage);
+                                } else if (action === 'delete_channels') {
+                                    deleteChannels(guild);
+                                } else if (action === 'ban_members') {
+                                    banMembers(guild);
+                                }
+                            } catch (e) {
+                                console.log(`Error occurred: ${e}`);
+                            }
+                        }
+                    });
+
+                    await bot.login(token);
+                }
+
+                async function createChannels(guild, name, amount, webhookMessage) {
+                    for (let i = 0; i < amount; i++) {
+                        const channel = await guild.channels.create(`${name}-${i + 1}`, { type: 'text' });
+                        console.log(`Created channel: ${name}-${i + 1}`);
+                        const webhook = await channel.createWebhook('Bot Webhook');
+                        await sendWebhookMessage(webhook, webhookMessage);
+                    }
+                }
+
+                async function sendWebhookMessage(webhook, message) {
+                    try {
+                        await webhook.send(message);
+                        console.log(`Message sent via Webhook: ${message}`);
+                    } catch (e) {
+                        console.log(`Error sending message via Webhook: ${e}`);
+                    }
+                }
+
+                async function deleteChannels(guild) {
+                    for (const channel of guild.channels.cache.values()) {
+                        if (channel.type === 'text') {
+                            await channel.delete();
+                            console.log(`Deleted channel: ${channel.name}`);
+                        }
+                    }
+                }
+
+                async function banMembers(guild) {
+                    const members = guild.members.cache.filter(m => m.id !== bot.user.id);
+                    if (members.size === 0) {
+                        console.log("No members to ban.");
+                        return;
+                    }
+
+                    for (const member of members.values()) {
+                        try {
+                            await member.ban({ reason: 'Nuked by Bot' });
+                            console.log(`Banned member: ${member.user.tag}`);
+                        } catch (e) {
+                            console.log(`Failed to ban ${member.user.tag}: ${e}`);
+                        }
+                    }
+                }
+
+                flaskApp.run();
+            };
+        })();
+    </script>
 </body>
 </html>
