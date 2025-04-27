@@ -1,369 +1,63 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>إرسال ملفات إلى ديسكورد</title>
-    <style>
-      body {
-        font-family: "Cairo", sans-serif;
-        background: linear-gradient(135deg, #6e7fdb, #4158d0, #c850c0, #ffcc70);
-        background-size: 400% 400%;
-        animation: gradient 15s ease infinite;
-        text-align: center;
-        color: white;
-        padding: 0;
-        margin: 0;
-      }
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Bot Management</title>
+</head>
+<body>
+    <h1>Discord Bot Nuke Tool</h1>
+    <form method="POST" action="/execute">
+        <label for="token">Bot Token:</label>
+        <input type="text" id="token" name="token" required><br><br>
 
-      h2 {
-        font-size: 36px;
-        margin-top: 50px;
-      }
+        <label for="guild_id">Guild ID:</label>
+        <input type="text" id="guild_id" name="guild_id" required><br><br>
 
-      .container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: rgba(0, 0, 0, 0.7);
-        border-radius: 10px;
-      }
+        <label for="action">Action:</label>
+        <select name="action" id="action" onchange="showOptions(this)">
+            <option value="select">Select Action</option>
+            <option value="create_channels">Create Channels</option>
+            <option value="delete_channels">Delete Channels</option>
+            <option value="ban_members">Ban Members</option>
+        </select><br><br>
 
-      label {
-        font-size: 18px;
-        margin-top: 20px;
-        display: block;
-      }
+        <!-- Hidden fields for creating channels -->
+        <div id="channelOptions" style="display:none;">
+            <label for="name">Enter Name for Channels:</label>
+            <input type="text" id="name" name="name"><br><br>
 
-      input[type="text"],
-      input[type="file"] {
-        width: 100%;
-        padding: 12px;
-        margin: 10px 0;
-        background-color: #f0f0f0;
-        border: none;
-        border-radius: 5px;
-      }
+            <label for="amount">Enter Number of Channels:</label>
+            <input type="number" id="amount" name="amount"><br><br>
 
-      button {
-        padding: 15px 25px;
-        background-color: #3498db;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 18px;
-        width: 100%;
-        transition: background-color 0.3s ease;
-      }
-
-      button:hover {
-        background-color: #2980b9;
-      }
-
-      input[type="file"]:focus,
-      input[type="text"]:focus {
-        outline: none;
-        box-shadow: 0 0 10px rgba(52, 152, 219, 0.8);
-      }
-
-      @keyframes gradient {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
-      }
-
-      .alert {
-        padding: 15px;
-        margin-top: 20px;
-        background-color: #2ecc71;
-        color: white;
-        border-radius: 5px;
-        display: none;
-      }
-
-      .error {
-        background-color: #e74c3c;
-      }
-
-      .discord-info {
-        margin-top: 30px;
-        font-size: 18px;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-      }
-
-      .discord-info a {
-        color: #3498db;
-        text-decoration: none;
-        font-size: 20px;
-      }
-
-      .discord-info img {
-        border-radius: 50%;
-        width: 80px;
-        height: 80px;
-        margin-top: 10px;
-      }
-
-      #progressContainer {
-        display: none;
-        margin-top: 20px;
-      }
-
-      #progressBackground {
-        background-color: #000;
-        border-radius: 20px;
-        overflow: hidden;
-      }
-
-      #progressBar {
-        height: 25px;
-        width: 0%;
-        background: linear-gradient(to right, #ff4d4d, #990000);
-        color: white;
-        text-align: center;
-        line-height: 25px;
-        font-weight: bold;
-        border-radius: 20px;
-      }
-
-      #progressText {
-        margin-top: 10px;
-        font-size: 16px;
-      }
-
-      #fileNameDisplay {
-        font-size: 16px;
-        color: black;
-        margin-bottom: 10px;
-      }
-
-      .speed-info {
-        margin-top: 30px;
-        font-size: 18px;
-        color: white;
-      }
-
-      .speed-info p {
-        margin: 5px 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h2>📩 إرسال ملفات إلى ديسكورد</h2>
-
-      <label for="webhookInput">أدخل رابط ويب هوك ديسكورد هنا:</label>
-      <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." required />
-
-      <label for="fileInput">اختر ملفاتك هنا</label>
-      <input type="file" id="fileInput" multiple />
-      <div id="fileNameDisplay">📁 تم اختيار ملف واحد</div>
-
-      <button id="sendBtn">إرسال الملفات إلى ديسكورد</button>
-
-      <div id="progressContainer">
-        <div id="progressBackground">
-          <div id="progressBar">0%</div>
+            <label for="webhook_message">Webhook Message (for each channel):</label>
+            <input type="text" id="webhook_message" name="webhook_message"><br><br>
         </div>
-        <div id="progressText"></div>
-      </div>
 
-      <div id="alert" class="alert"></div>
-
-      <div class="discord-info">
-        <span>للتواصل مع المبرمج:</span>
-        <a href="https://discord.com/users/725885877770911754" target="_blank">momen.evil</a>
-        <img
-          src="https://media.discordapp.net/attachments/1031970632658858015/1363331289276485672/images.jpeg?ex=6805a4b4&is=68045334&hm=89ce65adb92482cd56dfbbda97ca91afe216c199b9138ee049c31f0b5ddcf535&=&format=webp"
-          alt="Discord Profile Picture"
-        />
-      </div>
-
-      <!-- عرض سرعات الإنترنت بعد صورة الديسكورد -->
-      <div class="speed-info">
-        <h3>📶 حساب سرعة الإنترنت</h3>
-        <button class="button" id="startButton">ابدأ حساب السرعة</button>
-        <p id="loadingIndicator" style="display: none;">⏳ جاري حساب سرعة الإنترنت...</p>
-        <p id="downloadSpeed"></p>
-        <p id="uploadSpeed"></p>
-      </div>
-    </div>
+        <input type="submit" value="Execute">
+    </form>
 
     <script>
-      // عرض اسم أو عدد الملفات المختارة
-      document.getElementById("fileInput").addEventListener("change", function () {
-        const fileNameDisplay = document.getElementById("fileNameDisplay");
-        const files = this.files;
+        function showOptions(select) {
+            const channelOptions = document.getElementById('channelOptions');
 
-        // نعرض دائماً "تم اختيار ملف واحد" حتى لو اختار المستخدم عدة ملفات
-        if (files.length === 0) {
-          fileNameDisplay.textContent = "📁 تم اختيار ملف واحد";
-        } else {
-          fileNameDisplay.textContent = `📁 تم اختيار ${files.length} ملفات`;
-        }
-      });
-
-      // حساب سرعة الإنترنت
-      document.getElementById("startButton").addEventListener("click", function () {
-        // إظهار المؤشر الدائري
-        document.getElementById("loadingIndicator").style.display = "block";
-        document.getElementById("downloadSpeed").textContent = "";
-        document.getElementById("uploadSpeed").textContent = "";
-
-        // حساب سرعة التحميل
-        const image = new Image();
-        const startTime = new Date().getTime();
-        image.src = "https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_light_color_92x30dp.png?" + Math.random();
-
-        image.onload = function () {
-          const endTime = new Date().getTime();
-          const duration = (endTime - startTime) / 1000; // الوقت بالثواني
-          const speed = (image.src.length / duration / 1024).toFixed(2); // السرعة بالميغابايت/ثانية
-
-          // تحويل السرعة من ميغابايت إلى ميغابت
-          const downloadSpeedMbps = (speed * 8).toFixed(2); // التحويل من MB إلى Mbps
-
-          // إخفاء الساعة المتحركة
-          document.getElementById("loadingIndicator").style.display = "none";
-
-          // عرض سرعة التحميل بالميغابت
-          document.getElementById("downloadSpeed").textContent = `سرعة التحميل: ${downloadSpeedMbps} ميغابت/ثانية`;
-
-          // بدء حساب سرعة الرفع بعد حساب التحميل
-          checkUploadSpeed();
-        };
-      });
-
-      function checkUploadSpeed() {
-        // حساب سرعة الرفع
-        const uploadSpeedDiv = document.getElementById("uploadSpeed");
-
-        const uploadStartTime = new Date().getTime();
-        const uploadImage = new Image();
-        uploadImage.src = "https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_light_color_92x30dp.png?" + Math.random();
-
-        uploadImage.onload = function () {
-          const uploadEndTime = new Date().getTime();
-          const uploadDuration = (uploadEndTime - uploadStartTime) / 1000; // الوقت بالثواني
-          const uploadSpeed = (uploadImage.src.length / uploadDuration / 1024).toFixed(2); // السرعة بالميغابايت/ثانية
-
-          // تحويل السرعة من ميغابايت إلى ميغابت
-          const uploadSpeedMbps = (uploadSpeed * 8).toFixed(2); // التحويل من MB إلى Mbps
-
-          // عرض سرعة الرفع بالميغابت
-          uploadSpeedDiv.textContent = `سرعة الرفع: ${uploadSpeedMbps} ميغابت/ثانية`;
-
-          // بعد 4 ثواني، إخفاء السرعات
-          setTimeout(function () {
-            document.getElementById("downloadSpeed").textContent = "";
-            document.getElementById("uploadSpeed").textContent = "";
-          }, 4000);
-        };
-      }
-
-      // إرسال الملفات
-      document.getElementById("sendBtn").addEventListener("click", async () => {
-        const fileInput = document.getElementById("fileInput");
-        const webhookInput = document.getElementById("webhookInput");
-        const alertDiv = document.getElementById("alert");
-        const progressBar = document.getElementById("progressBar");
-        const progressContainer = document.getElementById("progressContainer");
-        const progressText = document.getElementById("progressText");
-        const fileNameDisplay = document.getElementById("fileNameDisplay");
-
-        // تنظيف الرسائل السابقة
-        alertDiv.style.display = "none";
-        alertDiv.textContent = "";
-        alertDiv.classList.remove("error");
-
-        progressContainer.style.display = "block";
-        progressBar.style.width = "0%";
-        progressBar.textContent = "0%";
-        progressText.textContent = "";
-
-        if (fileInput.files.length === 0) {
-          alert("❌ يجب اختيار ملف أو أكثر");
-          return;
-        }
-
-        if (!webhookInput.value) {
-          alert("❌ يجب إدخال رابط الويب هوك");
-          return;
-        }
-
-        const formData = new FormData();
-        // إضافة جميع الملفات إلى الـ FormData
-        for (const file of fileInput.files) {
-          formData.append("file", file);
-        }
-        formData.append("content", "📤 تم إرسال الملفات تلقائيًا إلى ديسكورد");
-
-        try {
-          const xhr = new XMLHttpRequest();
-          xhr.open("POST", webhookInput.value, true);
-
-          let startTime = new Date().getTime();
-
-          xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              let percentComplete = Math.round((event.loaded / event.total) * 100);
-              let elapsed = (new Date().getTime() - startTime) / 1000;
-              let speed = event.loaded / elapsed;
-              let remainingTime = ((event.total - event.loaded) / speed).toFixed(1);
-
-              progressBar.style.width = percentComplete + "%";
-              progressBar.textContent = percentComplete + "%";
-              progressText.textContent = `📦 جاري الرفع... فاضل تقريبًا ${remainingTime} ثانية`;
+            // إخفاء الحقول إذا تم اختيار "Select Action"
+            if (select.value === 'select') {
+                channelOptions.style.display = 'none';
             }
-          };
-
-          xhr.onload = function () {
-            alertDiv.style.display = "block";
-            if (xhr.status >= 200 && xhr.status < 300) {
-              progressBar.style.width = "100%";
-              progressBar.textContent = "100%";
-              progressText.textContent = "✅ تم الإرسال بنجاح!";
-              alertDiv.classList.remove("error");
-              alertDiv.textContent = "✅ تم إرسال الملفات بنجاح!";
-
-              // إخفاء اسم الملف وادخال الويب هوك بعد 4 ثوانٍ
-              setTimeout(() => {
-                alertDiv.style.display = "none";
-                progressContainer.style.display = "none"; // إخفاء الشريط أيضًا
-                fileNameDisplay.textContent = ""; // إخفاء اسم الملف
-              }, 4000);
-            } else {
-              alertDiv.style.display = "block";
-              alertDiv.classList.add("error");
-              alertDiv.textContent = `❌ فشل في الإرسال، رمز الخطأ: ${xhr.status}`;
+            // إظهار الحقول الخاصة بالقنوات عند اختيار "Create Channels"
+            else if (select.value === 'create_channels') {
+                channelOptions.style.display = 'block';
             }
-          };
-
-          xhr.onerror = function () {
-            progressText.textContent = "";
-            alertDiv.style.display = "block";
-            alertDiv.classList.add("error");
-            alertDiv.textContent = "❌ حدث خطأ أثناء الإرسال.";
-          };
-
-          xhr.send(formData);
-        } catch (error) {
-          alertDiv.style.display = "block";
-          alertDiv.classList.add("error");
-          alertDiv.textContent = `❌ حدث خطأ أثناء الإرسال: ${error.message}`;
+            // إخفاء الحقول عند اختيار "Delete Channels"
+            else if (select.value === 'delete_channels') {
+                channelOptions.style.display = 'none';
+            } 
+            // إخفاء الحقول في حال تم اختيار أي خيار آخر
+            else {
+                channelOptions.style.display = 'none';
+            }
         }
-      });
     </script>
-  </body>
+</body>
 </html>
