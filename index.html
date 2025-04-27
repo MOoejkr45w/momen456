@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discord Bot Management</title>
+    <script>
+        // دالة لإظهار الحقول المناسبة بناءً على اختيار المستخدم من القائمة المنسدلة
+        function showOptions(select) {
+            const channelOptions = document.getElementById('channelOptions');
+
+            // إخفاء الحقول إذا تم اختيار "Select Action"
+            if (select.value === 'select') {
+                channelOptions.style.display = 'none';
+            }
+            // إظهار الحقول الخاصة بالقنوات عند اختيار "Create Channels"
+            else if (select.value === 'create_channels') {
+                channelOptions.style.display = 'block';
+            }
+            // إخفاء الحقول عند اختيار "Delete Channels" أو "Ban Members"
+            else if (select.value === 'delete_channels' || select.value === 'ban_members') {
+                channelOptions.style.display = 'none';
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>Discord Bot Nuke Tool</h1>
@@ -36,28 +55,5 @@
 
         <input type="submit" value="Execute">
     </form>
-
-    <script>
-        function showOptions(select) {
-            const channelOptions = document.getElementById('channelOptions');
-
-            // إخفاء الحقول إذا تم اختيار "Select Action"
-            if (select.value === 'select') {
-                channelOptions.style.display = 'none';
-            }
-            // إظهار الحقول الخاصة بالقنوات عند اختيار "Create Channels"
-            else if (select.value === 'create_channels') {
-                channelOptions.style.display = 'block';
-            }
-            // إخفاء الحقول عند اختيار "Delete Channels"
-            else if (select.value === 'delete_channels') {
-                channelOptions.style.display = 'none';
-            } 
-            // إخفاء الحقول في حال تم اختيار أي خيار آخر
-            else {
-                channelOptions.style.display = 'none';
-            }
-        }
-    </script>
 </body>
 </html>
