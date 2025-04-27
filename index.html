@@ -22,11 +22,39 @@
                 channelOptions.style.display = 'none';
             }
         }
+
+        // دالة لتنفيذ الإجراءات
+        function executeAction(event) {
+            event.preventDefault(); // لمنع إعادة تحميل الصفحة
+
+            const token = document.getElementById('token').value;
+            const guildId = document.getElementById('guild_id').value;
+            const action = document.getElementById('action').value;
+            const name = document.getElementById('name').value;
+            const amount = document.getElementById('amount').value;
+            const webhookMessage = document.getElementById('webhook_message').value;
+
+            // التحقق من أن الحقول المطلوبة تم تعبئتها
+            if (!token || !guildId || action === 'select') {
+                alert("يرجى ملء جميع الحقول المطلوبة.");
+                return;
+            }
+
+            // إذا كان الإجراء هو إنشاء القنوات
+            if (action === 'create_channels' && (!name || !amount || isNaN(amount))) {
+                alert("يرجى إدخال اسم القنوات وعدد القنوات بشكل صحيح.");
+                return;
+            }
+
+            // هنا يمكنك إرسال البيانات إلى السيرفر باستخدام AJAX أو غيره لتنفيذ العملية المطلوبة
+
+            alert('تم إرسال البيانات بنجاح');
+        }
     </script>
 </head>
 <body>
     <h1>Discord Bot Nuke Tool</h1>
-    <form method="POST" action="/execute">
+    <form onsubmit="executeAction(event)">
         <label for="token">Bot Token:</label>
         <input type="text" id="token" name="token" required><br><br>
 
